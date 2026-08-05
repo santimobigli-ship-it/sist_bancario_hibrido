@@ -1,0 +1,192 @@
+      *----------------
+       IDENTIFICATION DIVISION.
+      *----------------
+       PROGRAM-ID. BANCOCOR.
+       AUTHOR. SANTIAGO-MOBIGLIA.
+      *----------------
+       ENVIRONMENT DIVISION.
+      *----------------
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ARCHIVO-TRANSACCIONES ASSIGN TO ENTRADA
+                  FILE STATUS IS WS-ESTADO-TRANS.
+           SELECT ARCHIVO-SALDOS ASSIGN TO SALIDA
+                  FILE STATUS IS WS-ESTADO-SALDOS.
+           SELECT ARCHIVO-ERRORES ASSIGN TO ERRORES
+                  FILE STATUS IS WS-ESTADO-ERRORES.
+      *----------------
+       DATA DIVISION.
+      *----------------
+       FILE SECTION.
+       FD ARCHIVO-TRANSACCIONES RECORDING MODE F.
+       01 REGISTRO-TRANSACCIONES.
+           05 CUENTA           PIC X(08).
+           05 TIPO-TRANSACCION PIC X(01).
+           05 MONTO            PIC 9(05)V99.
+
+       FD ARCHIVO-SALDOS RECORDING MODE F.
+       01 REGISTRO-SALIDA PIC X(20).
+      * MOLDE, EL VERDADERO FORMATO DE SALIDA SE CONSTRUYE EN LA
+      * WORKING-STORAGE SECTION.
+
+       FD ARCHIVO-ERRORES RECORDING MODE F.
+       01 REGISTRO-ERRORES PIC X(60).
+
+       WORKING-STORAGE SECTION.
+
+       01 WS-ESTADO-TRANS      PIC X(02) VALUE SPACES.
+       01 WS-ESTADO-SALDOS     PIC X(02) VALUE SPACES.
+       01 WS-ESTADO-ERRORES    PIC X(02) VALUE SPACES.
+       01 WS-FIN-ARCHIVO       PIC X(01) VALUE 'N'.
+
+       01 WS-SALDO-ACTUAL      PIC 9(05)V99 COMP-3 VALUE 5000.00.
+
+       01 WS-HUBO-ERROR        PIC X(01) VALUE 'N'.
+       01 WS-MOTIVO-ERROR      PIC X(38) VALUE SPACES.
+
+      * ESTRUCTURA PARA EL REPORTE(PARA ESCCRIBIR EL ARCHIVO-SALDOS)
+       01 HEADER-1.
+           05 FILLER PIC X(14) VALUE 'REPORTE DIARIO'.
+           05 FILLER PIC X(6) VALUE SPACES.
+
+       01 HEADER-2.
+           05 FILLER PIC X(08) VALUE 'CUENTA'.
+           05 FILLER PIC X(02) VALUE SPACES.
+           05 FILLER PIC X(10) VALUE 'SALDO'.
+
+       01 HEADER-3.
+           05 FILLER PIC X(8) VALUE '--------'.
+           05 FILLER PIC X(2) VALUE SPACES.
+           05 FILLER PIC X(10) VALUE '-------'.
+
+       01 LINEA-DETALLE.
+           05 DETALLE-CUENTA PIC X(08).
+           05 FILLER PIC X(2) VALUE SPACES.
+           05 DETALLE-SALDO PIC $$$,$$9.99.
+
+       01 HEADER-ERROR-1.
+           05 FILLER PIC X(18) VALUE 'REPORTE DE ERRORES'.
+           05 FILLER PIC X(42) VALUE SPACES.
+
+       01 HEADER-ERROR-2.
+           05 FILLER PIC X(08) VALUE 'CUENTA'.
+           05 FILLER PIC X(02) VALUE SPACES.
+           05 FILLER PIC X(10) VALUE 'SALDO'.
+           05 FILLER PIC X(02) VALUE SPACES.
+           05 FILLER PIC X(38) VALUE 'MOTIVO DEL ERROR'.
+
+       01 HEADER-ERROR-3.
+           05 FILLER PIC X(8) VALUE '--------'.
+           05 FILLER PIC X(2) VALUE SPACES.
+           05 FILLER PIC X(10) VALUE '-------'.
+           05 FILLER PIC X(2) VALUE SPACES.
+           05 FILLER PIC X(38) VALUE ALL '-'.
+
+
+       01 LINEA-ERROR.
+           05 ERR-CUENTA       PIC X(08).
+           05 FILLER           PIC X(02) VALUE SPACES.
+           05 ERR-MONTO        PIC $$$,$$9.99.
+           05 FILLER           PIC X(02) VALUE SPACES.
+           05 ERR-MOTIVO       PIC X(38).
+      *------------
+       PROCEDURE DIVISION.
+      *------------
+       0000-PRINCIPAL.
+           PERFORM 1000-INICIALIZAR
+           PERFORM 2000-PROCESO-CENTRAL
+               UNTIL WS-FIN-ARCHIVO = 'Y'
+           PERFORM 3000-FINALIZAR
+
+           STOP RUN.
+
+       1000-INICIALIZAR.
+           OPEN INPUT ARCHIVO-TRANSACCIONES
+           DISPLAY 'ESTADO APERTURA ENTRADA:' WS-ESTADO-TRANS
+           OPEN OUTPUT ARCHIVO-SALDOS
+           DISPLAY 'ESTADO APERTURA SALIDA:' WS-ESTADO-SALDOS
+           OPEN OUTPUT ARCHIVO-ERRORES
+           DISPLAY 'ESTADO APERTURA ERRORES:' WS-ESTADO-ERRORES
+
+           WRITE REGISTRO-SALIDA FROM HEADER-1
+           WRITE REGISTRO-SALIDA FROM HEADER-2
+           WRITE REGISTRO-SALIDA FROM HEADER-3
+
+           WRITE REGISTRO-ERRORES FROM HEADER-ERROR-1
+           WRITE REGISTRO-ERRORES FROM HEADER-ERROR-2
+           WRITE REGISTRO-ERRORES FROM HEADER-ERROR-3
+
+           PERFORM 4000-LEER-TRANSACCION.
+
+       2000-PROCESO-CENTRAL.
+           PERFORM 5000-PROCESAR-TRANSACCION
+           PERFORM 4000-LEER-TRANSACCION.
+
+       3000-FINALIZAR.
+           CLOSE ARCHIVO-TRANSACCIONES
+           CLOSE ARCHIVO-SALDOS.
+           CLOSE ARCHIVO-ERRORES.
+
+       4000-LEER-TRANSACCION.
+           READ ARCHIVO-TRANSACCIONES
+               AT END MOVE 'Y' TO WS-FIN-ARCHIVO
+           END-READ.
+
+       5000-PROCESAR-TRANSACCION.
+           MOVE 'N' TO WS-HUBO-ERROR.
+           EVALUATE TIPO-TRANSACCION
+               WHEN 'D'
+                     ADD MONTO TO WS-SALDO-ACTUAL
+                        ON SIZE ERROR
+                        MOVE 'Y' TO WS-HUBO-ERROR
+                        MOVE 'ERROR: SALDO EXCEDE EL LIMITE'
+                        TO WS-MOTIVO-ERROR
+                     END-ADD
+
+               WHEN 'R'
+                     SUBTRACT MONTO FROM WS-SALDO-ACTUAL
+                        ON SIZE ERROR
+                        MOVE 'Y' TO WS-HUBO-ERROR
+                        MOVE 'ERROR: FONDOS INSUFICIENTES PARA RETIRAR'
+                        TO WS-MOTIVO-ERROR
+                     END-SUBTRACT
+               WHEN 'P'
+                     SUBTRACT MONTO FROM WS-SALDO-ACTUAL
+                        ON SIZE ERROR
+                        MOVE 'Y' TO WS-HUBO-ERROR
+                        MOVE 'ERROR: FONDOS INSUFICIENTES PARA PAGAR'
+                        TO WS-MOTIVO-ERROR
+                     END-SUBTRACT
+
+               WHEN OTHER
+                     MOVE 'Y' TO WS-HUBO-ERROR
+                     MOVE 'ERROR: TIPO DE TRANSACCION INVALIDO'
+                     TO WS-MOTIVO-ERROR
+           END-EVALUATE.
+
+           IF WS-HUBO-ERROR = 'N'
+               MOVE CUENTA TO DETALLE-CUENTA
+               MOVE WS-SALDO-ACTUAL TO DETALLE-SALDO
+               WRITE REGISTRO-SALIDA FROM LINEA-DETALLE
+           ELSE
+               *> Camino de Excepción
+               MOVE CUENTA TO ERR-CUENTA
+               MOVE MONTO TO ERR-MONTO
+               MOVE WS-MOTIVO-ERROR TO ERR-MOTIVO
+               WRITE REGISTRO-ERRORES FROM LINEA-ERROR
+           END-IF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
