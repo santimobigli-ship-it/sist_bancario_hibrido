@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
-from etl import ejecutar_proceso_etl 
+from sist_bancario_hibrido.backend.PROCESO_ETL.etl import ejecutar_proceso_etl 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

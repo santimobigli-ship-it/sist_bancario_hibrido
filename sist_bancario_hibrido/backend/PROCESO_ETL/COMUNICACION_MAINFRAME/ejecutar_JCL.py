@@ -1,5 +1,5 @@
 import subprocess
-from config import RUTA_TRANSACCIONES, RUTA_ERRORES, RUTA_SALDOS
+from sist_bancario_hibrido.backend.app.config import RUTA_TRANSACCIONES, RUTA_ERRORES, RUTA_SALDOS
 
 def ejecutar_batch_mainframe():
     """
