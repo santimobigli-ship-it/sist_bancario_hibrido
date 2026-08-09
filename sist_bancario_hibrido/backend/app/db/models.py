@@ -11,6 +11,7 @@ class Cuenta(Base):
 
     numero_cuenta = Column(String(8), primary_key=True, index=True)
     titular = Column(String(100), nullable=False)
+    hashed_password = Column(String(255), nullable=False)
     saldo = Column(Numeric(7, 2), nullable=False, default=0.00)
     ultima_actualizacion = Column(DateTime, server_default=func.now(), onupdate=func.now())
 

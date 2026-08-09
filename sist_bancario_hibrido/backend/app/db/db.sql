@@ -29,3 +29,5 @@ CREATE TABLE excepciones_batch (
     fecha_procesamiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE cuentas 
+ADD COLUMN hashed_password VARCHAR(255) NOT NULL AFTER titular;

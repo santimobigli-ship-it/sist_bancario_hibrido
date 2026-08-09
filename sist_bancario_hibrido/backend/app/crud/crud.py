@@ -4,6 +4,28 @@ from datetime import date
 from decimal import Decimal
 import sist_bancario_hibrido.backend.app.db.models as models
 import sist_bancario_hibrido.backend.app.schemas.schemas as schemas 
+from passlib.context import CryptContext
+
+# Configuramos el encriptador
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    """Convierte la contraseña en un hash ilegible"""
+    return pwd_context.hash(password)
+
+def crear_cuenta(db: Session, cuenta: schemas.CuentaCreate):
+    """Crea una cuenta nueva con la contraseña encriptada"""
+    db_cuenta = models.Cuenta(
+        numero_cuenta=cuenta.numero_cuenta,
+        titular=cuenta.titular,
+        hashed_password=get_password_hash(cuenta.password), 
+        saldo=cuenta.saldo
+    )
+    db.add(db_cuenta)
+    db.commit()
+    db.refresh(db_cuenta)
+    return db_cuenta
+
 
 def obtener_cuenta(db: Session, numero_cuenta: str):
     """Devuelve los datos contables puros de la cuenta."""

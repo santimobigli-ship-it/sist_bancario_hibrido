@@ -11,8 +11,9 @@ class CuentaBase(BaseModel):
     saldo: Decimal = Field(default=Decimal('0.00'), max_digits=7, decimal_places=2)
 
 class CuentaCreate(CuentaBase):
-    """Esquema para crear una cuenta nueva"""
-    pass
+    """Esquema para crear cuenta. El usuario DEBE enviar una contraseña."""
+    password: str = Field(..., min_length=6, description="Mínimo 6 caracteres")
+    
 
 class CuentaResponse(CuentaBase):
     """Esquema para devolver datos de la cuenta al usuario"""
