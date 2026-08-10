@@ -1,8 +1,10 @@
-# main.py (El archivo principal de tu FastAPI)
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from sist_bancario_hibrido.backend.PROCESO_ETL.etl import ejecutar_proceso_etl 
+from app.api import cuentas, transacciones
+from app.db import models
+from app.db.database import engine
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,6 +25,34 @@ async def lifespan(app: FastAPI):
 # Iniciamos FastAPI pasándole el ciclo de vida (lifespan), asi se configura esto que dijimos antes de que se eejcute el proceso a esa hora y a la hora de apagar el contenedor no quedan procesos fantasmas.
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/")
-def read_root():
-    return {"mensaje": "Backend Home Banking Operativo"}
+# ==========================================
+# INICIALIZACIÓN DE LA BASE DE DATOS
+# ==========================================
+# Crea las tablas en MySQL si no existen (ideal para desarrollo)
+models.Base.metadata.create_all(bind=engine)
+
+# ==========================================
+# INSTANCIA DE FASTAPI
+# ==========================================
+app = FastAPI(
+    lifespan=lifespan,
+    title="API Core Bancario Híbrido",
+    description="Backend transaccional con soporte para procesamiento Batch (COBOL).",
+    version="1.0.0"
+)
+
+# ==========================================
+# REGISTRO DE ROUTERS (Tus endpoints)
+# ==========================================
+app.include_router(cuentas.router)
+app.include_router(transacciones.router)
+
+# ==========================================
+# RUTA RAÍZ (Health Check)
+# ==========================================
+@app.get("/", tags=["Inicio"])
+def root():
+    return {
+        "estado": "Online",
+        "mensaje": "Bienvenido al Core Bancario Híbrido. Ve a /docs para ver la documentación de la API."
+    }

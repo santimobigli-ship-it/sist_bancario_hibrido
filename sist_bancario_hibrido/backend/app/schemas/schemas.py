@@ -40,17 +40,3 @@ class TransaccionResponse(TransaccionBase):
     fecha_operacion: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
-# ==========================================
-# ESQUEMAS PARA EXCEPCIONES BATCH
-# ==========================================
-class ExcepcionBatchResponse(BaseModel):
-    """Las excepciones son de solo lectura, no necesitamos un esquema 'Create'"""
-    id_error: int
-    numero_cuenta: str
-    monto_intentado: Decimal
-    motivo_rechazo: str
-    fecha_procesamiento: datetime
-
-    model_config = ConfigDict(from_attributes=True)

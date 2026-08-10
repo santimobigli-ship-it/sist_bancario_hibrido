@@ -31,6 +31,28 @@ def obtener_cuenta(db: Session, numero_cuenta: str):
     """Devuelve los datos contables puros de la cuenta."""
     return db.query(models.Cuenta).filter(models.Cuenta.numero_cuenta == numero_cuenta).first()
 
+def verificar_password(plain_password: str, hashed_password: str) -> bool:
+    """Compara la contraseña en texto plano con el hash de la base de datos"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def autenticar_cuenta(db: Session, numero_cuenta: str, password: str):
+    """Busca la cuenta y verifica que la contraseña sea correcta"""
+    cuenta = obtener_cuenta(db, numero_cuenta)
+    if not cuenta:
+        return False
+    if not verificar_password(password, cuenta.hashed_password):
+        return False
+    return cuenta
+
+def actualizar_password(db: Session, numero_cuenta: str, nueva_password: str):
+    """Guarda el hash de la nueva contraseña en la base de datos"""
+    cuenta = obtener_cuenta(db, numero_cuenta)
+    if cuenta:
+        cuenta.hashed_password = get_password_hash(nueva_password)
+        db.commit()
+        db.refresh(cuenta)
+    return cuenta
+
 def calcular_saldo_disponible(db: Session, numero_cuenta: str) -> Decimal:
     """
     Calcula el saldo real al vuelo: Saldo Contable (Mainframe) + Movimientos de HOY.
