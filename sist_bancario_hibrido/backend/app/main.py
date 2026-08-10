@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
-from sist_bancario_hibrido.backend.PROCESO_ETL.etl import ejecutar_proceso_etl 
+from PROCESO_ETL.etl import ejecutar_proceso_etl 
 from app.api import cuentas, transacciones
 from app.db import models
 from app.db.database import engine
@@ -21,9 +21,6 @@ async def lifespan(app: FastAPI):
     # Esto se ejecuta CUANDO APAGAS el contenedor de Docker
     print("Apagando reloj interno...")
     scheduler.shutdown()
-
-# Iniciamos FastAPI pasándole el ciclo de vida (lifespan), asi se configura esto que dijimos antes de que se eejcute el proceso a esa hora y a la hora de apagar el contenedor no quedan procesos fantasmas.
-app = FastAPI(lifespan=lifespan)
 
 # ==========================================
 # INICIALIZACIÓN DE LA BASE DE DATOS

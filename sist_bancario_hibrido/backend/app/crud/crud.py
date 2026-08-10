@@ -19,8 +19,7 @@ def crear_cuenta(db: Session, cuenta: schemas.CuentaCreate):
         numero_cuenta=cuenta.numero_cuenta,
         titular=cuenta.titular,
         email=cuenta.email,
-        hashed_password=get_password_hash(cuenta.password), 
-        saldo=cuenta.saldo
+        hashed_password=get_password_hash(cuenta.password)
     )
     db.add(db_cuenta)
     db.commit()

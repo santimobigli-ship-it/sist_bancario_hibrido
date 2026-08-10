@@ -1,8 +1,8 @@
 import os
 from sqlalchemy import text
-from sist_bancario_hibrido.backend.app.db.database import engine
-from sist_bancario_hibrido.backend.app.utils.utils import formatear_para_cobol
-from sist_bancario_hibrido.backend.app.config import RUTA_TRANSACCIONES
+from app.db.database import engine
+from app.utils.utils import formatear_para_cobol
+from app.config import RUTA_TRANSACCIONES
 
 def generar_archivo_transacciones():
     # Subimos un nivel para llegar a core-cobol/data/

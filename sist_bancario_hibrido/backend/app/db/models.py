@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Integer, Numeric, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sist_bancario_hibrido.backend.app.db.database import Base  
+from app.db.database import Base  
 
 # ==========================================
 # MODELO: CUENTAS

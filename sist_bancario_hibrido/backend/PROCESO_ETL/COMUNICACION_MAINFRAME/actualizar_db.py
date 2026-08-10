@@ -1,8 +1,8 @@
 import os
 from sqlalchemy import text
-from sist_bancario_hibrido.backend.app.db.database import engine
-from sist_bancario_hibrido.backend.app.utils.utils import limpiar_moneda_cobol
-from sist_bancario_hibrido.backend.app.config import RUTA_ERRORES, RUTA_SALDOS
+from app.db.database import engine
+from app.utils.utils import limpiar_moneda_cobol
+from app.config import RUTA_ERRORES, RUTA_SALDOS
 
 def actualizar_bd_desde_cobol():
     """
