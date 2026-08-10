@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date
 from decimal import Decimal
-import sist_bancario_hibrido.backend.app.db.models as models
-import sist_bancario_hibrido.backend.app.schemas.schemas as schemas 
+from app.db import models
+from app.schemas import schemas
 from passlib.context import CryptContext
 
 # Configuramos el encriptador
@@ -18,6 +18,7 @@ def crear_cuenta(db: Session, cuenta: schemas.CuentaCreate):
     db_cuenta = models.Cuenta(
         numero_cuenta=cuenta.numero_cuenta,
         titular=cuenta.titular,
+        email=cuenta.email,
         hashed_password=get_password_hash(cuenta.password), 
         saldo=cuenta.saldo
     )
@@ -31,22 +32,26 @@ def obtener_cuenta(db: Session, numero_cuenta: str):
     """Devuelve los datos contables puros de la cuenta."""
     return db.query(models.Cuenta).filter(models.Cuenta.numero_cuenta == numero_cuenta).first()
 
+def obtener_cuenta_por_email(db: Session, email: str):
+    """Busca un usuario por su correo electrónico."""
+    return db.query(models.Cuenta).filter(models.Cuenta.email == email).first()
+
 def verificar_password(plain_password: str, hashed_password: str) -> bool:
     """Compara la contraseña en texto plano con el hash de la base de datos"""
     return pwd_context.verify(plain_password, hashed_password)
 
-def autenticar_cuenta(db: Session, numero_cuenta: str, password: str):
+def autenticar_cuenta(db: Session, email: str, password: str):
     """Busca la cuenta y verifica que la contraseña sea correcta"""
-    cuenta = obtener_cuenta(db, numero_cuenta)
+    cuenta = obtener_cuenta_por_email(db, email)
     if not cuenta:
         return False
     if not verificar_password(password, cuenta.hashed_password):
         return False
     return cuenta
 
-def actualizar_password(db: Session, numero_cuenta: str, nueva_password: str):
+def actualizar_password(db: Session, email: str, nueva_password: str):
     """Guarda el hash de la nueva contraseña en la base de datos"""
-    cuenta = obtener_cuenta(db, numero_cuenta)
+    cuenta = obtener_cuenta_por_email(db, email)
     if cuenta:
         cuenta.hashed_password = get_password_hash(nueva_password)
         db.commit()

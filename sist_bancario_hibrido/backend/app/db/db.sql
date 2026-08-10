@@ -31,3 +31,6 @@ CREATE TABLE excepciones_batch (
 
 ALTER TABLE cuentas 
 ADD COLUMN hashed_password VARCHAR(255) NOT NULL AFTER titular;
+
+ALTER TABLE cuentas 
+ADD COLUMN email VARCHAR(150) NOT NULL UNIQUE AFTER titular;
