@@ -1,0 +1,3 @@
+REPORTE DE ERRORES
+CUENTA    SALDO       MONTO       MOTIVO DEL ERROR
+--------  -------     --------    --------------------------------------

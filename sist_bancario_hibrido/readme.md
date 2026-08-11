@@ -95,7 +95,7 @@ Para revisores o reclutadores, se han incluido ejemplos de los archivos de entra
 <div align="center">
 
 ### Registro de Cuenta
-<img src="./registro/dashboard.png" alt="Registro Cuenta" width="600">
+<img src="./docs/registro.png" alt="Registro Cuenta" width="600">
 
 ### Login
 <img src="./docs/login.png" alt="Login Banco Híbrido" width="600">
