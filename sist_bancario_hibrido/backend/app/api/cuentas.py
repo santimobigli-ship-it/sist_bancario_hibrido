@@ -43,7 +43,8 @@ def iniciar_sesion(credenciales: schemas.CuentaLogin, db: Session = Depends(get_
     return {
         "mensaje": "Login exitoso", 
         "cuenta": cuenta_valida.numero_cuenta,
-        "email": cuenta_valida.email
+        "email": cuenta_valida.email,
+        "titular": cuenta_valida.titular
     }
 @router.post("/recuperar-password")
 async def solicitar_recuperacion(

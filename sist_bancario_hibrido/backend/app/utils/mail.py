@@ -23,8 +23,10 @@ async def enviar_correo_recuperacion(email_destino: EmailStr, token: str):
     """
     Construye y envía el correo electrónico en formato HTML.
     """
-    # En el futuro, este enlace apuntará a tu frontend en React
-    enlace = f"http://localhost:3000/reset-password?token={token}"
+    
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip('/')
+
+    enlace = f"{frontend_url}/reset-password?token={token}"
     
     html = f"""
     <div style="font-family: Arial, sans-serif; padding: 20px;">

@@ -5,6 +5,7 @@ from PROCESO_ETL.etl import ejecutar_proceso_etl
 from app.api import cuentas, transacciones
 from app.db import models
 from app.db.database import engine
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,6 +37,15 @@ app = FastAPI(
     title="API Core Bancario Híbrido",
     description="Backend transaccional con soporte para procesamiento Batch (COBOL).",
     version="1.0.0"
+)
+
+# Configuramos CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"], # Puertos de Vite o CRA
+    allow_credentials=True,
+    allow_methods=["*"], # Permite POST, GET, PUT, DELETE
+    allow_headers=["*"],
 )
 
 # ==========================================
